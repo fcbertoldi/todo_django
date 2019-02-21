@@ -14,5 +14,8 @@ class TaskState(enum.Enum):
 class Task(models.Model):
     title = models.CharField(max_length=200)
     description = models.CharField(max_length=200, default="")
-    state = serializers.ChoiceField(choices=[(i, ts.value) for i, ts in enumerate(TaskState)])
+    state = models.CharField(max_length=1, choices=[(t, t.value) for t in TaskState])
     archived = models.BooleanField(default=False)
+
+    def __str__(self):
+        return '{' + ' - '.join((self.title, self.state)) + '}'
