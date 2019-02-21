@@ -13,5 +13,6 @@ class TaskState(enum.Enum):
 
 class Task(models.Model):
     title = models.CharField(max_length=200)
-    description = models.CharField(max_length=200)
-    state = serializers.ChoiceField(choice=[(i, ts.value) for i, ts in enumerate(TaskState)])
+    description = models.CharField(max_length=200, default="")
+    state = serializers.ChoiceField(choices=[(i, ts.value) for i, ts in enumerate(TaskState)])
+    archived = models.BooleanField(default=False)
