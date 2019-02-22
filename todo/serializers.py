@@ -3,6 +3,8 @@ from rest_framework import serializers
 
 
 class TaskSerializer(serializers.ModelSerializer):
+    state = serializers.CharField(source='get_state_display')
+
     class Meta:
         model = Task
-        fields = ('title', 'description', 'state')
+        fields = ('id', 'title', 'description', 'state')

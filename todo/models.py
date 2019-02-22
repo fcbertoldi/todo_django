@@ -22,4 +22,4 @@ class Task(models.Model):
     archived = models.BooleanField(default=False)
 
     def __str__(self):
-        return ' - '.join((self.title, self.state))
+        return '{} - {} - {}'.format(self.id, self.title, self.state)
