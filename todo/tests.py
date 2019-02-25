@@ -5,8 +5,8 @@ from .models import Task
 
 class TaskTest(APITestCase):
     def setUp(self):
-        self.task_url = '/api/task/'
-        self.archived_url = '/api/archived/'
+        self.task_url = '/api/task'
+        self.archived_url = '/api/archived'
         self.title = 'Cortar grama.'
 
     def create_task(self):
@@ -16,7 +16,7 @@ class TaskTest(APITestCase):
         return res
 
     def archive_task(self, task_id):
-        archive_res = self.client.get(self.task_url + str(task_id) + '/archive')
+        archive_res = self.client.post('/'.join((self.task_url, str(task_id), 'archive')))
         self.assertEqual(status.HTTP_200_OK, archive_res.status_code)
         return archive_res
 
@@ -37,24 +37,24 @@ class TaskTest(APITestCase):
             'state': 'TODO'
         }
 
-        retrieve_res = self.client.get(self.task_url + str(create_res.data['id']))
+        retrieve_res = self.client.get(self.task_url + '/' + str(create_res.data['id']))
         self.assertEqual(status.HTTP_200_OK, retrieve_res.status_code)
         self.assertEqual(expected_data, retrieve_res.data)
 
     def test_retrieve_invalid_task(self):
-        retrieve_res = self.client.get(self.task_url+'1')
+        retrieve_res = self.client.get(self.task_url+'/1')
         self.assertEqual(status.HTTP_404_NOT_FOUND, retrieve_res.status_code)
 
     def test_delete_task(self):
         create_res = self.create_task()
-        delete_res = self.client.delete(self.task_url + str(create_res.data['id']))
+        delete_res = self.client.delete(self.task_url + '/' + str(create_res.data['id']))
         self.assertEqual(status.HTTP_204_NO_CONTENT, delete_res.status_code)
 
     def test_change_state(self):
         create_res = self.create_task()
         new_state = 'STARTED'
         payload = {'title': self.title, 'state': new_state}
-        put_res = self.client.put(self.task_url + str(create_res.data['id']), payload, format='json')
+        put_res = self.client.put(self.task_url + '/' + str(create_res.data['id']), payload, format='json')
         self.assertEqual(status.HTTP_200_OK, put_res.status_code)
         task = Task.objects.get()
         self.assertEqual('S', task.state)
@@ -72,38 +72,28 @@ class TaskTest(APITestCase):
             'state': 'TODO'
         }
 
-        archived_res = self.client.get(self.archived_url+str(task_id))
+        archived_res = self.client.get('/'.join((self.archived_url, str(task_id))))
         self.assertEqual(status.HTTP_200_OK, archived_res.status_code)
         self.assertEqual(expected_data, archived_res.data)
 
-        task_res = self.client.get(self.task_url+str(task_id))
+        task_res = self.client.get(self.task_url+'/'+str(task_id))
         self.assertEqual(status.HTTP_404_NOT_FOUND, task_res.status_code)
 
     def test_retrieve_invalid_archived_task(self):
         create_res = self.create_task()
         task_id = create_res.data['id']
-        res = self.client.get(self.archived_url+str(task_id))
+        res = self.client.get(self.archived_url+'/'+str(task_id))
         self.assertEqual(status.HTTP_404_NOT_FOUND, res.status_code)
 
     def test_unarchive_task(self):
         create_res = self.create_task()
         task_id = create_res.data['id']
         self.archive_task(task_id)
-        unarchive_res = self.client.get(self.archived_url+str(task_id)+'/unarchive')
+        unarchive_res = self.client.post('/'.join((self.archived_url, str(task_id), 'unarchive')))
         self.assertEqual(status.HTTP_200_OK, unarchive_res.status_code)
 
-        unarchived_res = self.client.get(self.archived_url+str(task_id))
+        unarchived_res = self.client.get('/'.join((self.archived_url, str(task_id))))
         self.assertEqual(status.HTTP_404_NOT_FOUND, unarchived_res.status_code)
 
-        task_res = self.client.get(self.task_url+str(task_id))
+        task_res = self.client.get('/'.join((self.task_url, str(task_id))))
         self.assertEqual(status.HTTP_200_OK, task_res.status_code)
-
-    def test_delete_archived_task(self):
-        create_res = self.create_task()
-        task_id = create_res.data['id']
-        self.archive_task(task_id)
-        delete_res = self.client.delete(self.archived_url+str(create_res.data['id']))
-        self.assertEqual(status.HTTP_204_NO_CONTENT, delete_res.status_code)
-
-        get_res = self.client.get(self.archived_url+str(task_id))
-        self.assertEqual(status.HTTP_404_NOT_FOUND, get_res.status_code)

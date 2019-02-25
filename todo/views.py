@@ -1,50 +1,30 @@
-from rest_framework import generics
+from rest_framework import generics, viewsets, mixins
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
 
 from .models import Task, toggle_archived
 from .serializers import TaskSerializer
 
 
-class ListTask(generics.ListCreateAPIView):
-    """"
-    API endpoint for listing tasks.
-    """
+class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.filter(archived=False).order_by('creation_time')
     serializer_class = TaskSerializer
 
-
-class DetailTask(generics.RetrieveUpdateDestroyAPIView):
-    """
-    API endpoint for retrieving, updating task state, and destroying task.
-    """
-    queryset = Task.objects.filter(archived=False).order_by('creation_time')
-    serializer_class = TaskSerializer
+    @action(detail=True, methods=['post'])
+    def archive(self, request, pk=None):
+        task = self.get_object()
+        task.toggle_archived()
+        return Response()
 
 
-@api_view(['GET'])
-def archive_task(request, **kwargs):
-    toggle_archived(kwargs['pk'], True)
-    return Response()
-
-
-class ListArchived(generics.ListAPIView):
-    """
-    API endpoint for archived tasks.
-    """
+class ArchivedTaskViewSet(mixins.ListModelMixin,
+                          mixins.RetrieveModelMixin,
+                          viewsets.GenericViewSet):
     queryset = Task.objects.filter(archived=True).order_by('creation_time')
     serializer_class = TaskSerializer
 
-
-class DetailArchived(generics.RetrieveUpdateDestroyAPIView):
-    """
-    API endpoint for retrieving, updating, unarchiving, and destroying archived tasks.
-    """
-    queryset = Task.objects.filter(archived=True).order_by('creation_time')
-    serializer_class = TaskSerializer
-
-
-@api_view(['GET'])
-def unarchive_task(request, **kwargs):
-    toggle_archived(kwargs['pk'], False)
-    return Response()
+    @action(detail=True, methods=['post'])
+    def unarchive(self, request, pk=None):
+        task = self.get_object()
+        task.toggle_archived()
+        return Response()
