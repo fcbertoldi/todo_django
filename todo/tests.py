@@ -34,7 +34,7 @@ class TaskTest(APITestCase):
             'id': task.id,
             'title': task.title,
             'description': None,
-            'state': 'T'
+            'state': 'TODO'
         }
 
         retrieve_res = self.client.get(self.task_url + str(create_res.data['id']))
@@ -48,12 +48,12 @@ class TaskTest(APITestCase):
 
     def test_change_state(self):
         create_res = self.create_task()
-        new_state = 'S'
+        new_state = 'STARTED'
         payload = {'title': self.title, 'state': new_state}
         put_res = self.client.put(self.task_url + str(create_res.data['id']), payload, format='json')
         self.assertEqual(status.HTTP_200_OK, put_res.status_code)
         task = Task.objects.get()
-        self.assertEqual(new_state, task.state)
+        self.assertEqual('S', task.state)
 
     def test_archive_task(self):
         create_res = self.create_task()
@@ -65,7 +65,7 @@ class TaskTest(APITestCase):
             'id': task.id,
             'title': task.title,
             'description': None,
-            'state': 'T'
+            'state': 'TODO'
         }
 
         archived_res = self.client.get(self.archived_url+str(task_id))
