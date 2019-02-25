@@ -17,7 +17,7 @@ class Task(models.Model):
 
     title = models.CharField(max_length=200)
     description = models.CharField(max_length=200, null=True, blank=True)
-    state = models.CharField(max_length=1, choices=TASK_STATE_CHOICES, default=TODO)
+    state = models.CharField(max_length=1, choices=TASK_STATE_CHOICES, default=TODO, blank=True)
     creation_time = models.DateTimeField(auto_now_add=True)
     archived = models.BooleanField(default=False)
 
