@@ -41,6 +41,10 @@ class TaskTest(APITestCase):
         self.assertEqual(status.HTTP_200_OK, retrieve_res.status_code)
         self.assertEqual(expected_data, retrieve_res.data)
 
+    def test_retrieve_invalid_task(self):
+        retrieve_res = self.client.get(self.task_url+'1')
+        self.assertEqual(status.HTTP_404_NOT_FOUND, retrieve_res.status_code)
+
     def test_delete_task(self):
         create_res = self.create_task()
         delete_res = self.client.delete(self.task_url + str(create_res.data['id']))
@@ -74,6 +78,12 @@ class TaskTest(APITestCase):
 
         task_res = self.client.get(self.task_url+str(task_id))
         self.assertEqual(status.HTTP_404_NOT_FOUND, task_res.status_code)
+
+    def test_retrieve_invalid_archived_task(self):
+        create_res = self.create_task()
+        task_id = create_res.data['id']
+        res = self.client.get(self.archived_url+str(task_id))
+        self.assertEqual(status.HTTP_404_NOT_FOUND, res.status_code)
 
     def test_unarchive_task(self):
         create_res = self.create_task()
