@@ -50,5 +50,18 @@ class TaskTest(APITestCase):
         self.assertEqual(new_state, task.state)
 
     def test_archive_task(self):
-        pass
+        create_res = self.create_task()
+        archive_res = self.client.get(self.base_url+str(create_res.data['id'])+'/archive')
+        self.assertEqual(status.HTTP_200_OK, archive_res.status_code)
+
+        task = Task.objects.get()
+        expected_data = {
+            'id': task.id,
+            'title': task.title,
+            'description': None,
+            'state': 'T'
+        }
+        archived_res = self.client.get('/api/archived/'+str(create_res.data['id']))
+        self.assertEqual(status.HTTP_200_OK, archived_res.status_code)
+        self.assertEqual(expected_data, archived_res.data)
 

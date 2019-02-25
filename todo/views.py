@@ -1,5 +1,7 @@
-from rest_framework import viewsets
 from rest_framework import generics
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+
 from .models import Task
 from .serializers import TaskSerializer
 
@@ -18,6 +20,17 @@ class DetailTask(generics.RetrieveUpdateDestroyAPIView):
     """
     queryset = Task.objects.filter(archived=False).order_by('creation_time')
     serializer_class = TaskSerializer
+
+
+@api_view(['GET'])
+def archive_task(request, **kwargs):
+    tasks = Task.objects.filter(archived=False).filter(id=kwargs['pk'])
+    if len(tasks) != 1:
+        raise Exception()
+    t = tasks[0]
+    t.archived = True
+    t.save()
+    return Response()
 
 
 class ListArchived(generics.ListAPIView):
