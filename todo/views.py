@@ -2,7 +2,7 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
-from .models import Task
+from .models import Task, toggle_archived
 from .serializers import TaskSerializer
 
 
@@ -24,12 +24,7 @@ class DetailTask(generics.RetrieveUpdateDestroyAPIView):
 
 @api_view(['GET'])
 def archive_task(request, **kwargs):
-    tasks = Task.objects.filter(archived=False).filter(id=kwargs['pk'])
-    if len(tasks) != 1:
-        raise Exception()
-    t = tasks[0]
-    t.archived = True
-    t.save()
+    toggle_archived(kwargs['pk'], True)
     return Response()
 
 
@@ -48,5 +43,8 @@ class DetailArchived(generics.RetrieveUpdateDestroyAPIView):
     queryset = Task.objects.filter(archived=True).order_by('creation_time')
     serializer_class = TaskSerializer
 
-    def put(self, request, *args, **kwargs):
-        pass  # TODO
+
+@api_view(['GET'])
+def unarchive_task(request, **kwargs):
+    toggle_archived(kwargs['pk'], False)
+    return Response()

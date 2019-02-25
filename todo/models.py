@@ -23,3 +23,9 @@ class Task(models.Model):
 
     def __str__(self):
         return '{} - {} - {}'.format(self.id, self.title, self.state)
+
+
+def toggle_archived(task_id, archive):
+    task = Task.objects.filter(archived=not archive).filter(id=task_id).get()
+    task.archived = archive
+    task.save()
