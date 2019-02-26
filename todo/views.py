@@ -2,7 +2,7 @@ from rest_framework import generics, viewsets, mixins
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, action
 
-from .models import Task, toggle_archived
+from .models import Task
 from .serializers import TaskSerializer
 
 
