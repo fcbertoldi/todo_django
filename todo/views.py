@@ -1,6 +1,6 @@
-from rest_framework import generics, viewsets, mixins
+from rest_framework import viewsets, mixins
 from rest_framework.response import Response
-from rest_framework.decorators import api_view, action
+from rest_framework.decorators import action
 
 from .models import Task
 from .serializers import TaskSerializer
